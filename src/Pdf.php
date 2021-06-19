@@ -3,6 +3,7 @@
 namespace Spatie\PdfToText;
 
 use Spatie\PdfToText\Exceptions\CouldNotExtractText;
+use Spatie\PdfToText\Exceptions\CouldNotScanPdf;
 use Spatie\PdfToText\Exceptions\PdfNotFound;
 use Symfony\Component\Process\Process;
 
@@ -12,11 +13,16 @@ class Pdf
 
     protected $binPath;
 
+    protected $binPathOcr;
+
     protected $options = [];
+
+    protected $scanOptions = [];
 
     public function __construct(string $binPath = null)
     {
         $this->binPath = $binPath ?? '/usr/bin/pdftotext';
+        $this->binPathOcr = $binPathOcr ?? '/usr/bin/ocrmypdf';
     }
 
     public function setPdf(string $pdf): self
@@ -37,10 +43,27 @@ class Pdf
         return $this;
     }
 
+    public function setScanOptions(array $options): self
+    {
+        $this->scanOptions = $this->parseOptions($options);
+
+        return $this;
+    }
+
     public function addOptions(array $options): self
     {
         $this->options = array_merge(
             $this->options,
+            $this->parseOptions($options)
+        );
+
+        return $this;
+    }
+
+    public function addScanOptions(array $options): self
+    {
+        $this->scanOptions = array_merge(
+            $this->scanOptions,
             $this->parseOptions($options)
         );
 
@@ -63,6 +86,17 @@ class Pdf
         };
 
         return array_reduce(array_map($mapper, $options), $reducer, []);
+    }
+
+    public function scan() : self
+    {
+        $process = new Process(array_merge([$this->binPathOcr], $this->scanOptions, [$this->pdf, $this->pdf]));
+        $process->run();
+        if (!$process->isSuccessful()) {
+            throw new CouldNotScanPdf($process);
+        }
+
+        return $this;
     }
 
     public function text() : string
