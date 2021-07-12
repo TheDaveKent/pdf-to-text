@@ -2,6 +2,7 @@
 
 namespace Spatie\PdfToText;
 
+use Spatie\PdfToText\Exceptions\CouldNotDecryptFile;
 use Spatie\PdfToText\Exceptions\CouldNotExtractText;
 use Spatie\PdfToText\Exceptions\CouldNotScanPdf;
 use Spatie\PdfToText\Exceptions\PdfNotFound;
@@ -15,14 +16,17 @@ class Pdf
 
     protected $binPathOcr;
 
+    protected $binPathQPDF;
+
     protected $options = [];
 
     protected $scanOptions = [];
 
-    public function __construct(string $binPath = null)
+    public function __construct(string $binPath = null, string $binPathOcr = null, string $binPathQPDF = null)
     {
         $this->binPath = $binPath ?? '/usr/bin/pdftotext';
         $this->binPathOcr = $binPathOcr ?? '/usr/bin/ocrmypdf';
+        $this->binPathQPDF = $binPathQPDF ?? '/usr/bin/qpdf';
     }
 
     public function setPdf(string $pdf): self
@@ -108,6 +112,26 @@ class Pdf
         }
 
         return trim($process->getOutput(), " \t\n\r\0\x0B\x0C");
+    }
+
+    public function decrypt(): self
+    {
+        $tempfile = "temp" . rand(0, 999999) . ".pdf";
+        $process = new Process(array_merge([$this->binPathQPDF], ["--decrypt"], [$this->pdf, $tempfile]));
+        $process->run();
+        if (!$process->isSuccessful()) {
+            throw new CouldNotDecryptFile($process);
+        }
+
+
+        // Copy back the contents
+        $process = new Process(["mv", $tempfile, $this->pdf]);
+        $process->run();
+        if (!$process->isSuccessful()) {
+            throw new CouldNotDecryptFile($process);
+        }
+
+        return $this;
     }
 
     public static function getText(string $pdf, string $binPath = null, array $options = []) : string

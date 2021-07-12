@@ -153,4 +153,22 @@ class PdfToTextTest extends TestCase
         $this->assertStringNotContainsString("This is page 1", $text);
         $this->assertStringNotContainsString("This is page 3", $text);
     }
+
+    /** @test */
+    public function it_can_decrypt_files()
+    {
+        // Scan can skip text
+        $text = (new Pdf($this->pdftotextPath))
+            ->setPdf(__DIR__.'/testfiles/multi_page_pass.pdf')
+            ->setScanOptions(['-l nld+eng', '--skip-text'])
+            ->setOptions(['-layout', '-f 2'])
+            ->addOptions(['-l 2'])
+            ->decrypt()
+            ->scan()
+            ->text();
+
+        $this->assertStringContainsString("This is page 2", $text);
+        $this->assertStringNotContainsString("This is page 1", $text);
+        $this->assertStringNotContainsString("This is page 3", $text);
+    }
 }
