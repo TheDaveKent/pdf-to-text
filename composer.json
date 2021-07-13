@@ -1,7 +1,10 @@
 {
-    "name": "spatie/pdf-to-text",
+    "name": "dragomirt/pdf-to-text",
     "description": "Extract text from a pdf",
     "keywords": [
+        "dragomirt",
+        "ocr",
+        "pdf",
         "spatie",
         "pdf-to-text"
     ],
@@ -9,9 +12,9 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Freek Van der Herten",
-            "email": "freek@spatie.be",
-            "homepage": "https://spatie.be",
+            "name": "Dragomir Țurcanu",
+            "email": "dtu@dragomirt.com",
+            "homepage": "https://dragomirt.com",
             "role": "Developer"
         }
     ],
