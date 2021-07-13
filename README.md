@@ -1,28 +1,6 @@
 # Extract text from a pdf
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/pdf-to-text.svg?style=flat-square)](https://packagist.org/packages/spatie/pdf-to-text)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/spatie/pdf-to-text/run-tests?label=tests)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Quality Score](https://img.shields.io/scrutinizer/g/spatie/pdf-to-text.svg?style=flat-square)](https://scrutinizer-ci.com/g/spatie/pdf-to-text)
-[![Total Downloads](https://img.shields.io/packagist/dt/spatie/pdf-to-text.svg?style=flat-square)](https://packagist.org/packages/spatie/pdf-to-text)
-
-This package provides a class to extract text from a pdf.
-
-```php
-use Spatie\PdfToText\Pdf;
-
-echo Pdf::getText('book.pdf'); //returns the text from the pdf
-```
-
-Spatie is a webdesign agency based in Antwerp, Belgium. You'll find an overview of all our open source projects [on our website](https://spatie.be/opensource).
-
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/pdf-to-text.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/pdf-to-text)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+Convert pdf to plain text, even on empty and encrypted files. This package is based on [spatie/pdf-to-text](https://github.com/spatie/pdf-to-text). 
 
 ## Requirements
 
@@ -50,6 +28,19 @@ If you're on RedHat or CentOS use this:
 
 ```bash
 yum install poppler-utils
+```
+
+To use the OCR functionality, install the following dependencies, in accordance to your package manager. The following example is based on Ubuntu.
+```bash
+apt-get install tesseract-ocr ocrmypdf
+
+```
+
+
+To use the decryption functionality, install the following dependencies, in accordance to your package manager.
+```bash
+#this is Debian based
+apt-get install qpdf
 ```
 
 ## Installation
@@ -120,33 +111,32 @@ the `Pdf` object from a container, and then add context-specific options elsewhe
      ->text()
  ;
  ```
-
-## Change log
-
-Please see [CHANGELOG](CHANGELOG.md) for more information about what has changed recently.
-
+ 
+ To extract data from empty files, use the `scan` method, with it's respective options setter. The method `decrypt` opens "encrypted" files with empty passwords.
+ 
+ ```php
+ $text = (new Pdf())
+     ->setPdf('table.pdf')
+     ->setOptions(['layout', 'r 96'])
+     ->addOptions(['f 1'])
+     ->setScanOptions(['-l nld+eng', '--skip-text'])
+     ->scan()
+     ->decrypt()
+     ->text()
+ ;
+ ```
+ 
 ## Testing
 
 ```bash
  composer test
 ```
 
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security
-
-If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
-
 ## Credits
 
 - [Freek Van der Herten](https://github.com/freekmurze)
+- [Dragomir Țurcanu](https://github.com/dragomirt)
 - [All Contributors](../../contributors)
-
-## About Spatie
-
-Spatie is a webdesign agency based in Antwerp, Belgium. You'll find an overview of all our open source projects [on our website](https://spatie.be/opensource).
 
 ## License
 
