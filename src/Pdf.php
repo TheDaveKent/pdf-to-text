@@ -117,7 +117,7 @@ class Pdf
     public function decrypt(): self
     {
         $tempfile = "/tmp/temp" . rand(0, 999999999) . ".pdf";
-        $process = new Process(array_merge([$this->binPathQPDF], ["--decrypt --no-warn"], [$this->pdf, $tempfile]));
+        $process = new Process(array_merge([$this->binPathQPDF], ["--decrypt"], [$this->pdf, $tempfile], ["--no-warn"]));
         $process->run();
         if (!$process->isSuccessful()) {
             throw new CouldNotDecryptFile($process);
