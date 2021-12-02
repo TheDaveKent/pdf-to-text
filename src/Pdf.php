@@ -22,11 +22,14 @@ class Pdf
 
     protected $scanOptions = [];
 
-    public function __construct(string $binPath = null, string $binPathOcr = null, string $binPathQPDF = null)
+    protected $timeout = 300; // 5 Minutes
+
+    public function __construct(?string $binPath = null, ?string $binPathOcr = null, ?string $binPathQPDF = null, ?int $timeout = null)
     {
         $this->binPath = $binPath ?? '/usr/bin/pdftotext';
         $this->binPathOcr = $binPathOcr ?? '/usr/bin/ocrmypdf';
         $this->binPathQPDF = $binPathQPDF ?? '/usr/bin/qpdf';
+        $this->timeout = $timeout ?? 300; // Default 5 minutes
     }
 
     public function setPdf(string $pdf): self
@@ -95,7 +98,7 @@ class Pdf
     public function scan() : self
     {
         $process = new Process(array_merge([$this->binPathOcr], $this->scanOptions, [$this->pdf, $this->pdf]));
-        $process->run();
+        $process->setTimeout($this->timeout)->run();
         if (!$process->isSuccessful()) {
             throw new CouldNotScanPdf($process);
         }
@@ -106,7 +109,7 @@ class Pdf
     public function text() : string
     {
         $process = new Process(array_merge([$this->binPath], $this->options, [$this->pdf, '-']));
-        $process->run();
+        $process->setTimeout($this->timeout)->run();
         if (!$process->isSuccessful()) {
             throw new CouldNotExtractText($process);
         }
@@ -117,8 +120,9 @@ class Pdf
     public function decrypt(): self
     {
         $tempfile = "/tmp/temp" . rand(0, 999999999) . ".pdf";
-        $process = new Process(array_merge([$this->binPathQPDF], ["--decrypt"], [$this->pdf, $tempfile], ["--no-warn"]));
-        $process->run();
+        $process = new Process(array_merge([$this->binPathQPDF], ["--decrypt"], [$this->pdf, $tempfile]));
+        $process->setTimeout($this->timeout)->run();
+
         if (!$process->isSuccessful()) {
             throw new CouldNotDecryptFile($process);
         }
@@ -126,7 +130,7 @@ class Pdf
 
         // Copy back the contents
         $process = new Process(["mv", $tempfile, $this->pdf]);
-        $process->run();
+        $process->setTimeout($this->timeout)->run();
         if (!$process->isSuccessful()) {
             throw new CouldNotDecryptFile($process);
         }
