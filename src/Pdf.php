@@ -123,10 +123,9 @@ class Pdf
         $process = new Process(array_merge([$this->binPathQPDF], ["--decrypt"], [$this->pdf, $tempfile]));
         $process->setTimeout($this->timeout)->run();
 
-        if (!$process->isSuccessful()) {
+        if ( false === in_array($process->getExitCode(), [0, 3]) ) {
             throw new CouldNotDecryptFile($process);
         }
-
 
         // Copy back the contents
         $process = new Process(["mv", $tempfile, $this->pdf]);
